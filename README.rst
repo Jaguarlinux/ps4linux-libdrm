@@ -35,17 +35,3 @@ modifiers instead of the generated static table.
 Compiling
 ---------
 
-To set up meson:
-
-    meson builddir/
-
-By default this will install into /usr/local, you can change your prefix
-with --prefix=/usr (or `meson configure builddir/ -Dprefix=/usr` after 
-the initial meson setup).
-
-Then use ninja to build and install:
-
-    ninja -C builddir/ install
-
-If you are installing into a system location you will need to run install
-separately, and as root.
