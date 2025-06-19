@@ -34,4 +34,16 @@ modifiers instead of the generated static table.
 
 Compiling
 ---------
+Make the scripts work.
+----------------------
+chmod +x build64.sh build32.sh.
 
+Compileing 64bit libdrm.
+-----------------------
+./build64.sh.
+
+Compileing 32bit libdrm.
+-------------------------
+./build32.sh.
+
+Then affter all that you will have the libdrm drivers setup and installed on your distro you want to port.
