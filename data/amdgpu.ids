@@ -474,6 +474,10 @@
 699F,	C9,	AMD Radeon 540
 6FDF,	E7,	AMD Radeon RX 590 GME
 6FDF,	EF,	AMD Radeon RX 580 2048SP
+9920,	00,     AMD Liverpool (PlayStation 4)
+9922,	00,     AMD Liverpool (PlayStation 4)
+9923,	00,     AMD Liverpool (PlayStation 4)
+9924,	11,     AMD Gladius (PlayStation 4)
 7300,	C1,	AMD FirePro S9300 x2
 7300,	C8,	AMD Radeon R9 Fury Series
 7300,	C9,	AMD Radeon Pro Duo
