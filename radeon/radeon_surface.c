@@ -85,8 +85,11 @@ enum radeon_family {
     CHIP_OLAND,
     CHIP_HAINAN,
     CHIP_BONAIRE,
+<<<<<<< HEAD
     CHIP_LIVERPOOL,
     CHIP_GLADIUS,
+=======
+>>>>>>> libdrm-upstream/main
     CHIP_KAVERI,
     CHIP_KABINI,
     CHIP_HAWAII,

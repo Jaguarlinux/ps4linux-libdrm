@@ -18,6 +18,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+<<<<<<< HEAD
 if dep_cunit.found()
   amdgpu_test = executable(
     'amdgpu_test',
@@ -34,6 +35,8 @@ if dep_cunit.found()
   )
 endif
 
+=======
+>>>>>>> libdrm-upstream/main
 amdgpu_stress = executable(
   'amdgpu_stress',
   files(

@@ -1,10 +1,18 @@
 /**
+<<<<<<< HEAD
  * \file xf86drm.h 
+=======
+ * \file xf86drm.h
+>>>>>>> libdrm-upstream/main
  * OS-independent header for DRM user-level library interface.
  *
  * \author Rickard E. (Rik) Faith <faith@valinux.com>
  */
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> libdrm-upstream/main
 /*
  * Copyright 1999, 2000 Precision Insight, Inc., Cedar Park, Texas.
  * Copyright 2000 VA Linux Systems, Inc., Sunnyvale, California.
@@ -197,9 +205,15 @@ typedef enum {
 typedef enum {
     /** \name Flags for DMA buffer dispatch */
     /*@{*/
+<<<<<<< HEAD
     DRM_DMA_BLOCK        = 0x01, /**< 
 				  * Block until buffer dispatched.
 				  * 
+=======
+    DRM_DMA_BLOCK        = 0x01, /**<
+				  * Block until buffer dispatched.
+				  *
+>>>>>>> libdrm-upstream/main
 				  * \note the buffer may not yet have been
 				  * processed by the hardware -- getting a
 				  * hardware lock with the hardware quiescent
@@ -693,7 +707,11 @@ extern int           drmGetLock(int fd,
 			        drmLockFlags flags);
 extern int           drmUnlock(int fd, drm_context_t context);
 extern int           drmFinish(int fd, int context, drmLockFlags flags);
+<<<<<<< HEAD
 extern int	     drmGetContextPrivateMapping(int fd, drm_context_t ctx_id, 
+=======
+extern int	     drmGetContextPrivateMapping(int fd, drm_context_t ctx_id,
+>>>>>>> libdrm-upstream/main
 						 drm_handle_t * handle);
 
 /* AGP/GART support: X server (root) only */
@@ -779,7 +797,11 @@ typedef struct _drmEventContext {
 	int version;
 
 	void (*vblank_handler)(int fd,
+<<<<<<< HEAD
 			       unsigned int sequence, 
+=======
+			       unsigned int sequence,
+>>>>>>> libdrm-upstream/main
 			       unsigned int tv_sec,
 			       unsigned int tv_usec,
 			       void *user_data);
@@ -843,6 +865,10 @@ extern char *drmGetRenderDeviceNameFromFd(int fd);
 #define DRM_BUS_USB       1
 #define DRM_BUS_PLATFORM  2
 #define DRM_BUS_HOST1X    3
+<<<<<<< HEAD
+=======
+#define DRM_BUS_FAUX      4
+>>>>>>> libdrm-upstream/main
 
 typedef struct _drmPciBusInfo {
     uint16_t domain;
@@ -889,6 +915,15 @@ typedef struct _drmHost1xDeviceInfo {
     char **compatible; /* NULL terminated list of compatible strings */
 } drmHost1xDeviceInfo, *drmHost1xDeviceInfoPtr;
 
+<<<<<<< HEAD
+=======
+#define DRM_FAUX_DEVICE_NAME_LEN 512
+
+typedef struct _drmFauxBusInfo {
+    char name[DRM_FAUX_DEVICE_NAME_LEN];
+} drmFauxBusInfo, *drmFauxBusInfoPtr;
+
+>>>>>>> libdrm-upstream/main
 typedef struct _drmDevice {
     char **nodes; /* DRM_NODE_MAX sized array */
     int available_nodes; /* DRM_NODE_* bitmask */
@@ -898,6 +933,10 @@ typedef struct _drmDevice {
         drmUsbBusInfoPtr usb;
         drmPlatformBusInfoPtr platform;
         drmHost1xBusInfoPtr host1x;
+<<<<<<< HEAD
+=======
+        drmFauxBusInfoPtr faux;
+>>>>>>> libdrm-upstream/main
     } businfo;
     union {
         drmPciDeviceInfoPtr pci;

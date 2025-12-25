@@ -33,7 +33,11 @@ Reporting Bugs
 ==============
 
 Bugs in this function should be reported to
+<<<<<<< HEAD
 https://gitlab.freedesktop.org/mesa/drm/-/issues
+=======
+https://gitlab.freedesktop.org/mesa/libdrm/-/issues
+>>>>>>> libdrm-upstream/main
 
 See Also
 ========

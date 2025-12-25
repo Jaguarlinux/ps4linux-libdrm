@@ -70,6 +70,10 @@
 
 static enum util_fill_pattern primary_fill = UTIL_PATTERN_SMPTE;
 static enum util_fill_pattern secondary_fill = UTIL_PATTERN_TILES;
+<<<<<<< HEAD
+=======
+static unsigned long pattern_seed = 0;
+>>>>>>> libdrm-upstream/main
 static drmModeModeInfo user_mode;
 
 struct crtc {
@@ -1199,7 +1203,11 @@ bo_fb_create(int fd, unsigned int fourcc, const uint32_t w, const uint32_t h,
 	struct bo *bo;
 	unsigned int fb_id;
 
+<<<<<<< HEAD
 	bo = bo_create(fd, fourcc, w, h, handles, pitches, offsets, pat);
+=======
+	bo = bo_create(fd, fourcc, w, h, handles, pitches, offsets, pat, pattern_seed);
+>>>>>>> libdrm-upstream/main
 
 	if (bo == NULL)
 		return -1;
@@ -1857,7 +1865,11 @@ static void set_cursors(struct device *dev, struct pipe_arg *pipes, unsigned int
 	 * translucent alpha
 	 */
 	bo = bo_create(dev->fd, DRM_FORMAT_ARGB8888, cw, ch, handles, pitches,
+<<<<<<< HEAD
 		       offsets, UTIL_PATTERN_PLAIN);
+=======
+		       offsets, UTIL_PATTERN_PLAIN, pattern_seed);
+>>>>>>> libdrm-upstream/main
 	if (bo == NULL)
 		return;
 
@@ -2126,6 +2138,19 @@ static void parse_fill_patterns(char *arg)
 	secondary_fill = util_pattern_enum(fill);
 }
 
+<<<<<<< HEAD
+=======
+static void parse_seed(const char *arg)
+{
+	unsigned long seed;
+	char *rest;
+
+	seed = strtoul(arg, &rest, 10);
+	if (arg != rest)
+		pattern_seed = seed;
+}
+
+>>>>>>> libdrm-upstream/main
 static void usage(char *name)
 {
 	fprintf(stderr, "usage: %s [-acDdefMoPpsCvrw]\n", name);
@@ -2149,6 +2174,10 @@ static void usage(char *name)
 	fprintf(stderr, "\t-w <obj_id>:<prop_name>:<value>\tset property, see 'property'\n");
 	fprintf(stderr, "\t-a \tuse atomic API\n");
 	fprintf(stderr, "\t-F pattern1,pattern2\tspecify fill patterns\n");
+<<<<<<< HEAD
+=======
+	fprintf(stderr, "\t-S <random seed>\tspecify seed of noise patterns\n");
+>>>>>>> libdrm-upstream/main
 	fprintf(stderr, "\t-o <desired file path> \t Dump writeback output buffer to file\n");
 
 	fprintf(stderr, "\n Generic options:\n\n");
@@ -2179,7 +2208,11 @@ static void usage(char *name)
 	exit(0);
 }
 
+<<<<<<< HEAD
 static char optstr[] = "acdD:efF:M:P:ps:Cvrw:o:";
+=======
+static char optstr[] = "acdD:efF:M:P:ps:Cvrw:o:S:";
+>>>>>>> libdrm-upstream/main
 
 int main(int argc, char **argv)
 {
@@ -2276,6 +2309,12 @@ int main(int argc, char **argv)
 
 			count++;
 			break;
+<<<<<<< HEAD
+=======
+		case 'S':
+			parse_seed(optarg);
+			break;
+>>>>>>> libdrm-upstream/main
 		case 'C':
 			test_cursor = 1;
 			break;

@@ -23,11 +23,19 @@
  * IN THE SOFTWARE.
  */
 
+<<<<<<< HEAD
+=======
+#include <assert.h>
+>>>>>>> libdrm-upstream/main
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+<<<<<<< HEAD
+=======
+#include <time.h>
+>>>>>>> libdrm-upstream/main
 
 #include <drm_fourcc.h>
 
@@ -40,6 +48,16 @@
 #include "format.h"
 #include "pattern.h"
 
+<<<<<<< HEAD
+=======
+struct color_rgba {
+    uint16_t red;
+    uint16_t green;
+    uint16_t blue;
+    uint16_t alpha;
+};
+
+>>>>>>> libdrm-upstream/main
 struct color_rgb24 {
 	unsigned int value:24;
 } __attribute__((__packed__));
@@ -301,6 +319,19 @@ static void write_pixels_10bpp(unsigned char *mem,
 	  mem[4] = ((d >> 2) & 0xff);
 }
 
+<<<<<<< HEAD
+=======
+static void update_pixels_10bpp(unsigned char *mem, uint64_t val, uint64_t mask)
+{
+	int i;
+
+	for (i = 0; i < 5; i++, mask >>= 8, val >>= 8) {
+		mem[i] &= ~(mask & 0xff);
+		mem[i] |= (mask & 0xff) & val;
+	}
+}
+
+>>>>>>> libdrm-upstream/main
 static void fill_smpte_yuv_planar_10bpp(const struct util_yuv_info *yuv,
 					unsigned char *y_mem,
 					unsigned char *uv_mem,
@@ -1849,6 +1880,270 @@ static void fill_gradient(const struct util_format_info *info, void *planes[3],
 	}
 }
 
+<<<<<<< HEAD
+=======
+static struct color_rgba get_black_white_value(uint64_t index)
+{
+	const struct color_rgba colors[] = {
+		{ .red = 0, .green = 0, .blue = 0, .alpha = 255 },       /* black */
+		{ .red = 255, .green = 255, .blue = 255, .alpha = 255 }, /* white */
+	};
+
+	return colors[index & 0x1];
+}
+
+static struct color_rgba get_noise_color_value()
+{
+	struct color_rgba color = {
+		.red = rand(),
+		.green = rand(),
+		.blue = rand(),
+		.alpha = 255
+	};
+
+	return color;
+}
+
+static struct color_rgba get_rgb_color(uint64_t index,
+                                       enum util_fill_pattern pattern)
+{
+	struct color_rgba color = {
+		.red = 0,
+		.green = 0,
+		.blue = 0,
+		.alpha = 0
+	};
+
+	switch (pattern) {
+	case UTIL_PATTERN_NOISE:
+		color = get_black_white_value(rand());
+
+	case UTIL_PATTERN_NOISE_COLOR:
+		color = get_noise_color_value();
+
+	case UTIL_PATTERN_BLACK_WHITE:
+		color = get_black_white_value(index);
+
+	default:
+		break;
+	}
+
+	return color;
+}
+
+static void insert_value_yuv_packed(const struct util_format_info *info,
+                                    void *planes[3], unsigned int stride,
+                                    unsigned int x, unsigned int y,
+                                    const struct color_rgba* color)
+{
+	struct color_yuv val = MAKE_YUV_601(color->red, color->green, color->blue);
+	const struct util_yuv_info *yuv = &info->yuv;
+	unsigned char *y_mem = (yuv->order & YUV_YC) ? planes[0] : planes[0] + 1;
+	unsigned char *c_mem = (yuv->order & YUV_CY) ? planes[0] : planes[0] + 1;
+	unsigned int u = (yuv->order & YUV_YCrCb) ? 2 : 0;
+	unsigned int v = (yuv->order & YUV_YCbCr) ? 2 : 0;
+
+	if (x & 0x1)
+		return;
+
+	y_mem += stride * y;
+	c_mem += stride * y;
+
+	y_mem[2*x] = val.y;
+	c_mem[2*x+u] = val.u;
+	y_mem[2*x+2] = val.y;
+	c_mem[2*x+v] = val.v;
+}
+
+static void insert_value_yuv_planar(const struct util_format_info *info,
+                                    void *planes[3], unsigned int stride,
+                                    unsigned int x, unsigned int y,
+                                    const struct color_rgba* color)
+{
+	struct color_yuv val = MAKE_YUV_601(color->red, color->green, color->blue);
+	const struct util_yuv_info *yuv = &info->yuv;
+	unsigned int cs = yuv->chroma_stride;
+	unsigned int xsub = yuv->xsub;
+	unsigned int ysub = yuv->ysub;
+	unsigned int chroma_offset = (y + 1) / ysub;
+	unsigned char *y_mem = planes[0] + (y * stride);
+	unsigned char *u_mem = planes[1];
+	unsigned char *v_mem = planes[2];
+
+	switch (info->format) {
+	case DRM_FORMAT_NV42:
+		u_mem = info->yuv.order & YUV_YCbCr ? planes[1] : planes[1] + 1;
+		v_mem = info->yuv.order & YUV_YCrCb ? planes[1] : planes[1] + 1;
+		break;
+	case DRM_FORMAT_YVU420:
+		u_mem = planes[2];
+		v_mem = planes[1];
+		break;
+	case DRM_FORMAT_YUV420:
+	default:
+		break;
+	}
+
+	u_mem += (chroma_offset * (stride * cs / xsub));
+	v_mem += (chroma_offset * (stride * cs / xsub));
+
+	y_mem[x] = val.y;
+	u_mem[x/xsub*cs] = val.u;
+	v_mem[x/xsub*cs] = val.v;
+}
+
+static inline bool is_power_of_two(unsigned long val)
+{
+	return (val != 0) && ((val & (val - 1)) == 0);
+}
+
+static bool check_yuv(const struct util_yuv_info *info)
+{
+	if (__builtin_expect(
+			is_power_of_two(info->xsub) &&
+			is_power_of_two(info->ysub) &&
+			is_power_of_two(info->chroma_stride), 1)) {
+		return true;
+	}
+
+	return false;
+}
+
+static void insert_value_yuv_planar_10bpp(const struct util_format_info *info,
+                                          void *planes[3], unsigned int stride,
+                                          unsigned int x, unsigned int y,
+                                          const struct color_rgba* color)
+{
+	struct color_yuv val = MAKE_YUV_601(color->red, color->green, color->blue);
+	const struct util_yuv_info *yuv = &info->yuv;
+	unsigned int cs = yuv->chroma_stride;
+	unsigned int xsub = yuv->xsub;
+	unsigned int ysub = yuv->ysub;
+	unsigned int xstep = cs * xsub;
+	unsigned int ysub_mask = ysub - 1;
+	unsigned int xsub_mask = xsub - 1;
+	unsigned int xstep_mask = xstep - 1;
+	unsigned char *y_mem = planes[0] + (y * stride);
+	unsigned char *uv_mem = planes[1] + (y * (stride * cs / xsub));
+	unsigned int block_start = ((x & 0x3) * 5) / 4;
+	unsigned int bit_start = (x & 0x3) * 10;
+
+	/* Plus two because val.y is only 8 bits */
+	update_pixels_10bpp(&y_mem[block_start], val.y << (bit_start + 2),
+                        0x3ff << bit_start);
+
+	/* This logic only works when xsub, ysub and chroma stride is power of two. */
+	assert(check_yuv(&info->yuv));
+
+	if (y & ysub_mask)
+		return;
+
+	if (x & xsub_mask)
+		return;
+
+	block_start = ((x & ~xstep_mask) * 5) / xstep;
+	bit_start = x & xstep_mask ? 0 : 20;
+
+	update_pixels_10bpp(&uv_mem[block_start],
+                        ((val.u << 2) | (val.v << 12)) << bit_start,
+                        0xfffff << bit_start);
+}
+
+
+static void insert_value_rgb32(const struct util_format_info *info,
+                               void *planes[3], unsigned int stride,
+                               unsigned int x, unsigned int y,
+                               const struct color_rgba* color)
+{
+	uint32_t *row = planes[0] + (stride * y);
+	uint32_t val = MAKE_RGBA10(&info->rgb, color->red, color->green,
+                               color->blue, color->alpha);
+
+	row[x] = val;
+}
+
+static void insert_value_rgb16fp(const struct util_format_info *info,
+                                 void *planes[3], unsigned int stride,
+                                 unsigned int x, unsigned int y,
+                                 const struct color_rgba* color)
+{
+	uint64_t *row = planes[0] + (stride * y);
+	uint64_t val = MAKE_RGBA10FP16(&info->rgb, color->red, color->green,
+                                   color->blue, color->alpha);
+
+	row[x] = val;
+}
+
+static void fill_simple_patterns(const struct util_format_info *info,
+                                 void *planes[3], unsigned int width,
+                                 unsigned int height, unsigned int stride,
+                                 enum util_fill_pattern pattern)
+{
+	void (*func_insert_value)(const struct util_format_info *info,
+                              void *planes[3], unsigned int stride,
+                              unsigned int x, unsigned int y,
+                              const struct color_rgba* color);
+	int x, y;
+
+	switch (info->format) {
+	case DRM_FORMAT_UYVY:
+	case DRM_FORMAT_VYUY:
+	case DRM_FORMAT_YUYV:
+	case DRM_FORMAT_YVYU:
+		func_insert_value = &insert_value_yuv_packed;
+		break;
+	case DRM_FORMAT_NV12:
+	case DRM_FORMAT_NV21:
+	case DRM_FORMAT_NV16:
+	case DRM_FORMAT_NV61:
+	case DRM_FORMAT_NV24:
+	case DRM_FORMAT_NV42:
+	case DRM_FORMAT_YUV420:
+	case DRM_FORMAT_YVU420:
+		func_insert_value = &insert_value_yuv_planar;
+		break;
+	case DRM_FORMAT_NV15:
+	case DRM_FORMAT_NV20:
+	case DRM_FORMAT_NV30:
+		func_insert_value = &insert_value_yuv_planar_10bpp;
+		break;
+	case DRM_FORMAT_ARGB8888:
+	case DRM_FORMAT_XRGB8888:
+	case DRM_FORMAT_ABGR8888:
+	case DRM_FORMAT_XBGR8888:
+	case DRM_FORMAT_RGBA8888:
+	case DRM_FORMAT_RGBX8888:
+	case DRM_FORMAT_BGRA8888:
+	case DRM_FORMAT_BGRX8888:
+	case DRM_FORMAT_ARGB2101010:
+	case DRM_FORMAT_XRGB2101010:
+	case DRM_FORMAT_ABGR2101010:
+	case DRM_FORMAT_XBGR2101010:
+	case DRM_FORMAT_RGBA1010102:
+	case DRM_FORMAT_RGBX1010102:
+	case DRM_FORMAT_BGRA1010102:
+	case DRM_FORMAT_BGRX1010102:
+		func_insert_value = &insert_value_rgb32;
+		break;
+	case DRM_FORMAT_XRGB16161616F:
+	case DRM_FORMAT_XBGR16161616F:
+	case DRM_FORMAT_ARGB16161616F:
+	case DRM_FORMAT_ABGR16161616F:
+		func_insert_value = &insert_value_rgb16fp;
+		break;
+	default:
+		return;
+	}
+
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			struct color_rgba color = get_rgb_color((width * y) + x, pattern);
+			(*func_insert_value)(info, planes, stride, x, y, &color);
+		}
+	}
+}
+
+>>>>>>> libdrm-upstream/main
 /*
  * util_fill_pattern - Fill a buffer with a test pattern
  * @format: Pixel format
@@ -1857,13 +2152,21 @@ static void fill_gradient(const struct util_format_info *info, void *planes[3],
  * @width: Width in pixels
  * @height: Height in pixels
  * @stride: Line stride (pitch) in bytes
+<<<<<<< HEAD
+=======
+ * @seed: Seed for noise patterns if zero a default time based seed will be used
+>>>>>>> libdrm-upstream/main
  *
  * Fill the buffers with the test pattern specified by the pattern parameter.
  * Supported formats vary depending on the selected pattern.
  */
 void util_fill_pattern(uint32_t format, enum util_fill_pattern pattern,
 		       void *planes[3], unsigned int width,
+<<<<<<< HEAD
 		       unsigned int height, unsigned int stride)
+=======
+		       unsigned int height, unsigned int stride, unsigned long seed)
+>>>>>>> libdrm-upstream/main
 {
 	const struct util_format_info *info;
 
@@ -1872,6 +2175,21 @@ void util_fill_pattern(uint32_t format, enum util_fill_pattern pattern,
 		return;
 
 	switch (pattern) {
+<<<<<<< HEAD
+=======
+	case UTIL_PATTERN_NOISE:
+	case UTIL_PATTERN_NOISE_COLOR:
+		if (!seed)
+			seed = time(NULL);
+		srand(seed);
+		printf("Seed used for noise patterns %lu\n", seed);
+		break;
+	default:
+		break;
+	}
+
+	switch (pattern) {
+>>>>>>> libdrm-upstream/main
 	case UTIL_PATTERN_TILES:
 		return fill_tiles(info, planes, width, height, stride);
 
@@ -1884,6 +2202,15 @@ void util_fill_pattern(uint32_t format, enum util_fill_pattern pattern,
 	case UTIL_PATTERN_GRADIENT:
 		return fill_gradient(info, planes, width, height, stride);
 
+<<<<<<< HEAD
+=======
+	case UTIL_PATTERN_NOISE:
+	case UTIL_PATTERN_NOISE_COLOR:
+	case UTIL_PATTERN_BLACK_WHITE:
+		return fill_simple_patterns(info, planes, width, height, stride,
+                                    pattern);
+
+>>>>>>> libdrm-upstream/main
 	default:
 		printf("Error: unsupported test pattern %u.\n", pattern);
 		break;
@@ -1895,6 +2222,12 @@ static const char *pattern_names[] = {
 	[UTIL_PATTERN_SMPTE] = "smpte",
 	[UTIL_PATTERN_PLAIN] = "plain",
 	[UTIL_PATTERN_GRADIENT] = "gradient",
+<<<<<<< HEAD
+=======
+	[UTIL_PATTERN_NOISE] = "noise",
+	[UTIL_PATTERN_NOISE_COLOR] = "noise-color",
+	[UTIL_PATTERN_BLACK_WHITE] = "black-white",
+>>>>>>> libdrm-upstream/main
 };
 
 enum util_fill_pattern util_pattern_enum(const char *name)

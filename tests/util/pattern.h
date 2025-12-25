@@ -33,11 +33,21 @@ enum util_fill_pattern {
 	UTIL_PATTERN_PLAIN,
 	UTIL_PATTERN_SMPTE,
 	UTIL_PATTERN_GRADIENT,
+<<<<<<< HEAD
+=======
+	UTIL_PATTERN_NOISE,
+	UTIL_PATTERN_NOISE_COLOR,
+	UTIL_PATTERN_BLACK_WHITE,
+>>>>>>> libdrm-upstream/main
 };
 
 void util_fill_pattern(uint32_t format, enum util_fill_pattern pattern,
 		       void *planes[3], unsigned int width,
+<<<<<<< HEAD
 		       unsigned int height, unsigned int stride);
+=======
+		       unsigned int height, unsigned int stride, unsigned long seed);
+>>>>>>> libdrm-upstream/main
 
 void util_smpte_fill_lut(unsigned int ncolors, struct drm_color_lut *lut);
 
